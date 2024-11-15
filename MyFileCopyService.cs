@@ -10,27 +10,59 @@ namespace FileCopyService
     public partial class MyFileCopyService : ServiceBase
     {
         private Timer _timer;
-        private string _sourceFolder = @"C:\ServerDrive";
-        private string _destinationFolder = @"C:\FileShare";
-        private string _logDbPath = @"C:\FileCopyLog.db";
+        private readonly int _interval = 1; // 5 minutes
+        private readonly string _basePath = @"C:\Users\Public";
+        private string _sourceFolder;
+        private string _destinationFolder;
+        private string _logDbPath;
+        private string _messageLogPath;
+        private string _errorLogPath;
 
         public MyFileCopyService()
         {
-           // InitializeComponent();
+            // InitializeComponent();
+            InitializePaths();
         }
+
+        private void InitializePaths()
+        {
+            // Initialize paths relative to the base path
+            _sourceFolder = Path.Combine(_basePath, "ServerDrive");
+            _destinationFolder = Path.Combine(_basePath, "FileShare");
+            _logDbPath = Path.Combine(_basePath, "FileCopyLog.db");
+            _messageLogPath = Path.Combine(_basePath, "FileCopyServiceDebug.log");
+            _errorLogPath = Path.Combine(_basePath, "FileCopyServiceError.log");
+
+            // Ensure directories exist
+            Directory.CreateDirectory(_sourceFolder);
+            Directory.CreateDirectory(_destinationFolder);
+        }
+
+        public void Start() // Custom method for console debugging
+        {
+            OnStart(null);
+        }
+
+        public void Stop() // Custom method for console debugging
+        {
+            OnStop();
+        }
+
 
         protected override void OnStart(string[] args)
         {
             InitializeDatabase();
-            _timer = new Timer(300000); // 5 minutes
+            _timer = new Timer(_interval); // 5 minutes
             _timer.Elapsed += OnTimerElapsed;
             _timer.Start();
+            Log("Service started.");
         }
 
         protected override void OnStop()
         {
             _timer.Stop();
             _timer.Dispose();
+            Log("Service stopped.");
         }
 
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
@@ -38,11 +70,17 @@ namespace FileCopyService
             try
             {
                 CopyFiles();
+                Log("Timer elapsed, performing file copy operation...");
             }
             catch (Exception ex)
             {
                 LogError(ex.Message);
             }
+        }
+
+        private void Log(string message)
+        {
+            File.AppendAllText(_messageLogPath, $"{DateTime.Now}: {message}\n");
         }
 
         private void CopyFiles()
@@ -113,7 +151,7 @@ namespace FileCopyService
 
         private void LogError(string message)
         {
-            File.AppendAllText(@"C:\FileCopyError.log", $"{DateTime.Now}: {message}\n");
+            File.AppendAllText(_errorLogPath, $"{DateTime.Now}: {message}\n");
         }
     }
 }
