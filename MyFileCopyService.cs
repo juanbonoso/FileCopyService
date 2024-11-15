@@ -10,7 +10,7 @@ namespace FileCopyService
     public partial class MyFileCopyService : ServiceBase
     {
         private Timer _timer;
-        private readonly int _interval = 1; // 5 minutes
+        private readonly int _interval = 300000; // 5 minutes
         private readonly string _basePath = @"C:\Users\Public";
         private string _sourceFolder;
         private string _destinationFolder;
