@@ -11,12 +11,13 @@ namespace FileCopyService
     {
         private Timer _timer;
         private readonly int _interval = 300000; // 5 minutes
-        private readonly string _basePath = @"C:\Users\Public";
-        private string _sourceFolder;
-        private string _destinationFolder;
+        // Dedicated base path for logging and log database
+        private readonly string _logBasePath = @"C:\Users\Public\FileCopyService";
         private string _logDbPath;
-        private string _messageLogPath;
-        private string _errorLogPath;
+
+        // Configurable source and destination folders
+        private string _sourceFolder = @"C:\Users\Public\FileCopyService\ServerDrive";
+        private string _destinationFolder = @"C:\Users\Public\FileCopyService\FileShare";
 
         public MyFileCopyService()
         {
@@ -26,14 +27,13 @@ namespace FileCopyService
 
         private void InitializePaths()
         {
-            // Initialize paths relative to the base path
-            _sourceFolder = Path.Combine(_basePath, "ServerDrive");
-            _destinationFolder = Path.Combine(_basePath, "FileShare");
-            _logDbPath = Path.Combine(_basePath, "FileCopyLog.db");
-            _messageLogPath = Path.Combine(_basePath, "FileCopyServiceDebug.log");
-            _errorLogPath = Path.Combine(_basePath, "FileCopyServiceError.log");
+            // Initialize paths for logging
+            _logDbPath = Path.Combine(_logBasePath, "FileCopyLog.db");
 
-            // Ensure directories exist
+            // Ensure logging directory exists
+            Directory.CreateDirectory(_logBasePath);
+
+            // Ensure source and destination directories exist
             Directory.CreateDirectory(_sourceFolder);
             Directory.CreateDirectory(_destinationFolder);
         }
@@ -76,11 +76,6 @@ namespace FileCopyService
             {
                 LogError(ex.Message);
             }
-        }
-
-        private void Log(string message)
-        {
-            File.AppendAllText(_messageLogPath, $"{DateTime.Now}: {message}\n");
         }
 
         private void CopyFiles()
@@ -149,9 +144,18 @@ namespace FileCopyService
             }
         }
 
+
+        private void Log(string message)
+        {
+            string messageLogsPath = Path.Combine(_logBasePath, "FileCopyServiceDebug.log");
+            File.AppendAllText(messageLogsPath, $"{DateTime.Now}: {message}\n");
+        }
+
         private void LogError(string message)
         {
-            File.AppendAllText(_errorLogPath, $"{DateTime.Now}: {message}\n");
+            string errorLogPath = Path.Combine(_logBasePath, "FileCopyServiceError.log");
+
+            File.AppendAllText(errorLogPath, $"{DateTime.Now}: {message}\n");
         }
     }
 }
