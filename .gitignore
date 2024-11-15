@@ -1,0 +1,30 @@
+# Build artifacts
+bin/
+obj/
+*.exe
+*.dll
+
+# Logs
+*.log
+FileCopyLog.db
+
+# Visual Studio specific files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+
+# Other
+Thumbs.db
+desktop.ini
